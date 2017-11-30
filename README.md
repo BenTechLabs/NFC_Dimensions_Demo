@@ -1,2 +1,2 @@
 # NFC_Dimensions_Demo
-asimple nfc project useing the lego dimensions portal nfc board
+A simple NFC project written in python using the Lego Dimensions Portal as an NFC board.
