@@ -11,6 +11,12 @@ OFF   = [0,0,0]
 RED   = [255,0,0]
 GREEN = [0,255,0]
 BLUE  = [0,0,255]
+WHITE  = [255,255,255]
+
+testVader = (4, 161, 158, 210, 227, 64 , 128)
+
+TAG_INSERTED = 0
+TAG_REMOVED  = 1
 
 ALL_PADS   = 0
 CENTER_PAD = 1
@@ -57,9 +63,50 @@ def switch_pad(pad, colour):
     send_command(dev,[0x55, 0x06, 0xc0, 0x02, pad, colour[0], colour[1], colour[2],])
     return
 
+def uid_compare(uid1, uid2):
+    match = True
+    for i in range(0,7):
+        if (uid1[i] != uid2[i]) :
+            match = False
+    return match 
+
+
 def main():
     init_usb()
-    
+    switch_pad(LEFT_PAD,RED)
+    switch_pad(LEFT_PAD,RED)
+    switch_pad(LEFT_PAD,RED)
     sleep(1)
-    NFC.write(1,PADS_OFF)
+    switch_pad(ALL_PADS,OFF)
+    
+        if dev != None :
+        while True:
+            try:
+                in_packet = dev.read(0x81, 32, timeout = 10)
+                bytelist = list(in_packet)
+
+                if not bytelist:
+                    pass
+                elif bytelist[0] != 0x56: # NFC packets start with 0x56
+                    pass
+                else:
+                    pad_num = bytelist[2]
+                    uid_bytes = bytelist[6:13]
+                    match = uid_compare(uid_bytes, testVader)
+                    action = bytelist[5]
+                    if action == TAG_INSERTED :
+                        if match:
+                            switch_pad(pad_num, RED)
+                        else:
+                            switch_pad(pad_num, WHITE)
+                    else:
+                        switch_pad(pad_num, OFF)
+
+            except usb.USBError, err:
+                pass
+
+        switch_pad(ALL_PADS,OFF)
     return
+
+if __name__ == '__main__':
+    main()
